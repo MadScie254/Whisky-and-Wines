@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 
 // In production, this would be an environment variable
@@ -21,6 +22,14 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+export interface ProductFilters {
+  type?: string;
+  origin?: string;
+  min_price?: number;
+  max_price?: number;
+  q?: string;
+}
+
 export const endpoints = {
   auth: {
     login: '/auth/login/',
@@ -28,7 +37,15 @@ export const endpoints = {
     signup: '/auth/signup/',
   },
   products: {
-    list: '/products/',
+    list: (filters: ProductFilters = {}) => {
+      const params = new URLSearchParams();
+      if (filters.q) params.append('q', filters.q);
+      if (filters.type) params.append('type', filters.type);
+      if (filters.origin) params.append('origin', filters.origin);
+      if (filters.min_price) params.append('price_min', filters.min_price.toString());
+      if (filters.max_price) params.append('price_max', filters.max_price.toString());
+      return `/products/?${params.toString()}`;
+    },
     detail: (slug: string) => `/products/${slug}/`,
     vault: '/vault/',
   },
